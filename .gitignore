@@ -1,0 +1,31 @@
+# Python cache/build output
+__pycache__/
+*.py[cod]
+*.pyo
+.pytest_cache/
+
+# Python virtual environments
+.venv/
+venv/
+env/
+
+# Local environment files
+.env
+.env.*
+
+# Node/dependency folders, if added later
+node_modules/
+
+# IDE/runtime machine state
+.idea/workspace.xml
+.idea/shelf/
+out/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# ML demo artifacts are intentionally not ignored:
+# ml/data/blackjack_states.csv
+# ml/models/blackjack_policy_model.joblib
+# ml/models/evaluation_report*.txt
