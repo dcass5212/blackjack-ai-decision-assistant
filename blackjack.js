@@ -109,11 +109,18 @@ function cloneHand(hand) {
 }
 
 function getCurrentGameState() {
+  const dealerUpCard = cloneCard(dealerHand[0]);
+  const unseenCards = cloneHand(deck);
+
+  if (dealerHand[1]) {
+    unseenCards.push(cloneCard(dealerHand[1]));
+  }
+
   return {
     playerHand: cloneHand(playerHand),
-    dealerUpCard: cloneCard(dealerHand[0]),
-    dealerHand: cloneHand(dealerHand),
-    remainingDeck: cloneHand(deck),
+    dealerUpCard,
+    dealerHand: dealerUpCard ? [dealerUpCard] : [],
+    remainingDeck: unseenCards,
     currentBet: bet,
     balance,
     canDoubleDown: bet > 0 && balance >= bet && playerHand.length === 2,
@@ -458,7 +465,7 @@ function getAIExplanationText(odds) {
   const bestResult = odds.actionResults.find(result => result.action === odds.recommendedAction);
   const bestEV = bestResult ? formatExpectedValue(bestResult.expectedValue) : '0.000';
 
-  return `${odds.reason} EV is win rate minus loss rate, doubled for double down. This live panel uses Monte Carlo simulation; the supervised ML model is trained offline to approximate these recommendations. Current mode uses the full dealer hand for simulation. Best EV: ${bestEV}.`;
+  return `${odds.reason} EV is win rate minus loss rate, doubled for double down. This live panel uses Monte Carlo simulation from the visible dealer upcard; the hidden card is sampled from unseen cards. The supervised ML model is trained offline to approximate these recommendations. Best EV: ${bestEV}.`;
 }
 
 function setPhase(phase) {

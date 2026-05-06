@@ -90,12 +90,19 @@ function simulateRound(action, gameState) {
 
 // Clone all mutable data so Monte Carlo trials never affect the actual game.
 function cloneSimulationState(gameState) {
+  const remainingDeck = shuffleSimulationDeck(cloneSimulationCards(gameState.remainingDeck));
+  const dealerHand = gameState.dealerUpCard
+    ? [{ r: gameState.dealerUpCard.r, s: gameState.dealerUpCard.s }]
+    : cloneSimulationCards(gameState.dealerHand || []);
+
+  if (dealerHand.length === 1) {
+    dealerHand.push(drawSimulationCard(remainingDeck));
+  }
+
   return {
     playerHand: cloneSimulationCards(gameState.playerHand),
-    // Phase 3/4 use debug mode: the simulation knows the dealer hole card.
-    // A future realistic mode can rebuild dealerHand from dealerUpCard only.
-    dealerHand: cloneSimulationCards(gameState.dealerHand),
-    remainingDeck: shuffleSimulationDeck(cloneSimulationCards(gameState.remainingDeck)),
+    dealerHand,
+    remainingDeck,
   };
 }
 

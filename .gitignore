@@ -13,12 +13,15 @@ env/
 .env
 .env.*
 
+# Local planning/context notes
+docs/PROJECT_CONTEXT.md
+
 # Node/dependency folders, if added later
 node_modules/
 
 # IDE/runtime machine state
-.idea/workspace.xml
-.idea/shelf/
+.idea/
+*.iml
 out/
 
 # OS files
@@ -28,4 +31,4 @@ Thumbs.db
 # ML demo artifacts are intentionally not ignored:
 # ml/data/blackjack_states.csv
 # ml/models/blackjack_policy_model.joblib
-# ml/models/evaluation_report*.txt
+# ml/models/evaluation_report_*.txt

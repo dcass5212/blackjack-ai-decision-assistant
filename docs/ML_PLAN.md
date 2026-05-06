@@ -1,4 +1,4 @@
-# Phase 7 ML Plan
+# Blackjack ML Plan
 
 ## Goal
 Build a scoped supervised-learning extension that helps this project read as an AI/ML portfolio project without becoming over-engineered.

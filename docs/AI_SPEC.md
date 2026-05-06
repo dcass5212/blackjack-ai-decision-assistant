@@ -3,7 +3,7 @@
 ## Feature Name
 Blackjack AI Decision Assistant
 
-## User Story
+## Why This Matters
 As a player, I want to see the estimated odds for hit, stand, and double down so that I can understand which Blackjack action has the best expected outcome.
 
 ## Inputs

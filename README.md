@@ -1,9 +1,30 @@
 # Blackjack AI Decision Assistant
 
 ## Overview
-This project is an interactive Blackjack game enhanced with an AI decision assistant. The assistant estimates the probability of winning, losing, or pushing for each available action: hit, stand, and double down.
+This project is a Blackjack decision assistant wrapped in an interactive browser demo. The assistant estimates the probability of winning, losing, or pushing for each available action: hit, stand, and double down.
 
 The goal is to demonstrate applied AI concepts in a practical browser-based project, including probability simulation, expected value calculation, decision support, and explainable recommendations.
+
+## Demo Screenshot
+![Blackjack AI decision assistant showing odds and recommendation](docs/Screenshot%202026-05-06%20033756.png)
+
+## Scope
+This is a scoped decision-support project, not a full casino Blackjack simulator. It focuses on core single-hand decisions and keeps advanced table rules out of scope so the AI/ML workflow stays clear and reviewable.
+
+Included:
+- Hit, stand, and double down decisions
+- Single-player browser gameplay
+- Single-deck remaining-card simulation
+- Dealer upcard-based Monte Carlo advice
+- Offline supervised-learning workflow that imitates Monte Carlo labels
+
+Out of scope:
+- Splitting pairs
+- Surrender
+- Insurance
+- Side bets
+- Multi-deck shoe behavior
+- Casino-grade basic strategy validation
 
 ## AI Approach
 The first version uses Monte Carlo simulation. For each possible action, the program simulates thousands of possible outcomes from the current hand and remaining deck. It then estimates the probability of each outcome and recommends the action with the highest expected value.
@@ -19,7 +40,7 @@ EV = winRate - lossRate
 
 Double down uses the same idea but doubles the EV impact because the bet is doubled.
 
-The current implementation uses internal/debug mode for simulation, which means it uses the full dealer hand already stored by the game. A later version can switch to a more realistic mode that only uses the dealer upcard and samples the hidden card during simulation.
+The live assistant uses realistic visible information: it starts from the dealer upcard and samples the hidden dealer card from the remaining unseen cards during simulation.
 
 ## Key Features
 - Interactive Blackjack gameplay
@@ -39,6 +60,59 @@ The game includes preset hands that can be loaded from the betting screen. These
 - 11 vs dealer 6
 - 20 vs dealer 10
 
+## Deployment
+The app is static HTML, CSS, and JavaScript, so no build step or local server is required.
+
+Run locally:
+
+```txt
+Open index.html in a browser.
+```
+
+Deploy with GitHub Pages:
+1. Push the repository to GitHub.
+2. Open the repository settings.
+3. Go to Pages.
+4. Set the source to deploy from the default branch and repository root.
+5. Use the generated GitHub Pages URL as the live demo link.
+
+`index.html` is the live demo entry point. `blackjackAI.html` is kept as a redirect for older links.
+
+Verify JavaScript behavior:
+
+```powershell
+npm test
+```
+
+Reproduce the ML workflow:
+
+```powershell
+py -3.11 -m venv .venv
+.\.venv\Scripts\Activate.ps1
+py -m pip install --upgrade pip
+py -m pip install -r ml/requirements.txt
+py ml/generate_dataset.py --rows 10000 --simulations 500 --seed 42
+py ml/train_model.py
+```
+
+Run the trained model on a preset demo hand:
+
+```powershell
+py ml/predict_policy.py --sample hard16
+```
+
+Run the trained model on custom visible cards:
+
+```powershell
+py ml/predict_policy.py --player-cards 10S,6H --dealer-upcard 10C
+```
+
+## Project Docs
+- `docs/ROADMAP.md` tracks portfolio readiness and future work.
+- `docs/AI_SPEC.md` describes the AI assistant design.
+- `docs/ML_PLAN.md` outlines the supervised-learning extension.
+- `docs/Screenshot 2026-05-06 033756.png` shows the browser demo with the AI odds panel.
+
 ## Supervised ML Expansion
 The project now includes a supervised-learning workflow that trains a model to approximate the Monte Carlo assistant's recommended action. The ML model is not meant to replace the simulator as a perfect strategy engine; it learns from Monte Carlo-generated labels and gives a clear portfolio example of dataset generation, feature engineering, model training, and evaluation.
 
@@ -50,16 +124,44 @@ Implemented workflow:
 - Train both a decision tree and random forest classifier with `ml/train_model.py`
 - Evaluate models with accuracy, classification report, and confusion matrix
 - Save the best model as a reusable `.joblib` artifact
+- Run the saved model against demo or custom hands with `ml/predict_policy.py`
 
 This is intentionally scoped as supervised learning, not reinforcement learning or deep learning.
 
-Phase 7 scripts:
+Phase 7 reproducibility:
+
+Use Python 3.10 or newer. On Windows, the commands below use the Python launcher `py`; if your machine does not have it, replace `py` with `python`.
+
+Create and activate a local virtual environment:
 
 ```powershell
-py ml/generate_dataset.py --rows 1000 --simulations 500
+py -3.11 -m venv .venv
+.\.venv\Scripts\Activate.ps1
+py -m pip install --upgrade pip
 py -m pip install -r ml/requirements.txt
+```
+
+Recreate the committed 10,000-row dataset and train the model:
+
+```powershell
+py ml/generate_dataset.py --rows 10000 --simulations 500 --seed 42
 py ml/train_model.py
 ```
+
+Expected output range:
+- The committed dataset contains 10,000 rows.
+- With the default train/test split and seed, the random forest should be the best model.
+- Expected random forest test accuracy is about 0.90 to 0.91.
+- The saved model is written to `ml/models/blackjack_policy_model.joblib`.
+
+## Tests
+The JavaScript game and AI logic include a dependency-free Node test suite:
+
+```powershell
+npm test
+```
+
+Current coverage includes hand scoring, blackjack and bust detection, legal actions, dealer draw behavior, realistic dealer upcard simulation, Monte Carlo result shape, input-state immutability, and ML feature-column consistency.
 
 Current results:
 
@@ -82,11 +184,20 @@ The saved model artifact is:
 ml/models/blackjack_policy_model.joblib
 ```
 
+Inference demo:
+
+```powershell
+py ml/predict_policy.py --sample hard16
+py ml/predict_policy.py --sample soft18
+py ml/predict_policy.py --sample double11
+py ml/predict_policy.py --sample stand20
+```
+
 ## Limitations
-- The live Monte Carlo assistant currently uses internal/debug mode, so simulations can access the dealer's full hand instead of only the visible upcard.
+- The live Monte Carlo assistant estimates outcomes from the visible dealer upcard, so recommendations vary slightly between runs because the hidden card is sampled during simulation.
 - After simulating an initial `hit`, the simulated player follows a simple policy of drawing until 17 or higher.
 - The supervised ML model learns to imitate Monte Carlo labels; it is not trained against perfect Blackjack strategy or casino-grade basic strategy tables.
-- Insurance, surrender, splitting, side bets, and multi-deck shoe behavior are out of scope.
+- Splitting, surrender, insurance, side bets, and multi-deck shoe behavior are intentionally out of scope.
 
 ## Technologies
 - HTML

@@ -1,0 +1,8 @@
+{
+  "name": "blackjack-ai-decision-assistant",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "test": "node tests/blackjack.test.js"
+  }
+}
