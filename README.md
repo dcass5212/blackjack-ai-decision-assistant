@@ -1,5 +1,8 @@
 # Blackjack AI Decision Assistant
 
+## Live Demo
+Try it here: https://dcass5212.github.io/blackjack-ai-decision-assistant/
+
 ## Overview
 This project is a Blackjack decision assistant wrapped in an interactive browser demo. The assistant estimates the probability of winning, losing, or pushing for each available action: hit, stand, and double down.
 
