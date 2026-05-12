@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(.venv/Scripts/python.exe -c ' *)",
+      "Bash(powershell *)",
+      "Bash(.venv/Scripts/python.exe rl/evaluate.py --hands 100000 --seed 42)",
+      "Bash(.venv/Scripts/python.exe rl/evaluate.py --hands 100000 --seed 42 --no-plot)"
+    ]
+  }
+}

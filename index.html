@@ -7,7 +7,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet" />
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { background: #1a1a2e; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
+    body { background: #1a1a2e; display: flex; flex-direction: column; justify-content: flex-start; align-items: center; min-height: 100vh; padding: 40px 20px 60px; gap: 24px; }
     #bj { font-family: 'DM Sans', sans-serif; background: #0d4a2a; min-height: 600px; border-radius: 16px; padding: 24px; color: #f0ead2; position: relative; overflow: hidden; width: 100%; max-width: 620px; }
     #bj::before { content: ''; position: absolute; inset: 12px; border: 2px solid rgba(255,220,100,0.3); border-radius: 12px; pointer-events: none; }
     .title { font-family: 'Playfair Display', serif; text-align: center; font-size: 30px; color: #ffd700; letter-spacing: 2px; margin-bottom: 6px; }
@@ -63,6 +63,31 @@
     .ai-recommendation { color: #ffd700; font-size: 12px; margin-top: 8px; text-align: center; }
     .ai-explanation { color: rgba(240,234,210,0.62); font-size: 11px; line-height: 1.35; margin-top: 8px; text-align: center; }
     .msg { text-align: center; font-size: 12px; color: rgba(240,234,210,0.5); margin-top: 6px; }
+
+    /* RL verdict inside AI panel */
+    .rl-verdict { display: none; margin-top: 10px; padding: 8px 10px; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,215,0,0.15); border-radius: 6px; align-items: center; justify-content: space-between; gap: 8px; }
+    .rl-verdict.visible { display: flex; }
+    .rl-verdict-label { font-size: 9px; text-transform: uppercase; letter-spacing: 1px; color: rgba(240,234,210,0.45); margin-bottom: 2px; }
+    .rl-verdict-action { font-size: 13px; font-weight: 700; color: #ffd700; }
+    .rl-verdict-badge { font-size: 10px; padding: 3px 8px; border-radius: 20px; font-weight: 500; white-space: nowrap; }
+    .rl-verdict-badge.agree { background: rgba(46,204,113,0.15); color: #2ecc71; border: 1px solid rgba(46,204,113,0.3); }
+    .rl-verdict-badge.differ { background: rgba(230,126,34,0.15); color: #e67e22; border: 1px solid rgba(230,126,34,0.3); }
+
+    /* Results comparison section */
+    .results-section { width: 100%; max-width: 620px; font-family: 'DM Sans', sans-serif; }
+    .results-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,215,0,0.15); border-radius: 16px; padding: 24px; position: relative; overflow: hidden; }
+    .results-card::before { content: ''; position: absolute; inset: 12px; border: 1px solid rgba(255,215,0,0.07); border-radius: 10px; pointer-events: none; }
+    .results-heading { font-family: 'Playfair Display', serif; font-size: 20px; color: #ffd700; letter-spacing: 1px; text-align: center; margin-bottom: 4px; }
+    .results-subheading { font-size: 11px; color: rgba(240,234,210,0.45); text-transform: uppercase; letter-spacing: 1.5px; text-align: center; margin-bottom: 20px; }
+    .results-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    .results-table th { color: rgba(240,234,210,0.45); font-weight: 500; text-align: right; padding: 6px 8px; font-size: 10px; text-transform: uppercase; letter-spacing: 0.8px; border-bottom: 1px solid rgba(255,215,0,0.12); }
+    .results-table th:first-child { text-align: left; }
+    .results-table td { padding: 9px 8px; text-align: right; border-bottom: 1px solid rgba(240,234,210,0.06); color: rgba(240,234,210,0.75); }
+    .results-table td:first-child { text-align: left; color: #f0ead2; }
+    .results-table tr.rl-best td { color: #ffd700; font-weight: 700; }
+    .results-table tr.rl-best td:first-child::before { content: '★ '; font-size: 10px; }
+    .ev-best { color: #2ecc71 !important; }
+    .results-caption { margin-top: 14px; font-size: 11px; color: rgba(240,234,210,0.45); line-height: 1.5; text-align: center; }
   </style>
 </head>
 <body>
@@ -137,11 +162,62 @@
     </table>
     <div class="ai-recommendation" id="ai-recommendation"></div>
     <div class="ai-explanation" id="ai-explanation"></div>
+    <div class="rl-verdict" id="rl-verdict">
+      <div>
+        <div class="rl-verdict-label">RL Policy &middot; PPO</div>
+        <div class="rl-verdict-action" id="rl-action-text">&mdash;</div>
+      </div>
+      <div class="rl-verdict-badge" id="rl-verdict-badge"></div>
+    </div>
   </div>
   <div class="msg" id="msg"></div>
 </div>
 
+<section class="results-section">
+  <div class="results-card">
+    <div class="results-heading">Three-Agent Evaluation</div>
+    <div class="results-subheading">100,000 hands &middot; same seeded sequence &middot; single deck</div>
+    <table class="results-table">
+      <thead>
+        <tr>
+          <th>Agent</th>
+          <th>Win%</th>
+          <th>Push%</th>
+          <th>Loss%</th>
+          <th>EV/hand</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Basic strategy</td>
+          <td>43.09%</td>
+          <td>9.05%</td>
+          <td>47.86%</td>
+          <td>&minus;0.0306</td>
+        </tr>
+        <tr>
+          <td>Random forest</td>
+          <td>42.50%</td>
+          <td>8.61%</td>
+          <td>48.89%</td>
+          <td>&minus;0.0543</td>
+        </tr>
+        <tr class="rl-best">
+          <td>RL (MaskablePPO)</td>
+          <td>45.16%</td>
+          <td>9.02%</td>
+          <td>45.82%</td>
+          <td class="ev-best">&minus;0.0065</td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="results-caption">EV is expected value per $1 bet. The RL agent learned from game outcomes alone &mdash; no labels, no strategy chart. It outperforms basic strategy by exploiting deck composition in single-deck play. See <a href="rl/RESULTS.md" style="color:rgba(240,234,210,0.55)">rl/RESULTS.md</a> for full analysis.</div>
+  </div>
+</section>
+
 <script src="blackjack-ai.js"></script>
 <script src="blackjack.js"></script>
+<script src="rl_policy_lookup.js"></script>
+<script src="blackjack-rl.js"></script>
 </body>
 </html>

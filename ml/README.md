@@ -88,3 +88,7 @@ The training script fits a decision tree and random forest, reports accuracy and
 ```txt
 ml/models/blackjack_policy_model.joblib
 ```
+
+## Next Step: Reinforcement Learning
+
+The Phase 8 extension in `rl/` trains a PPO agent from game outcomes alone and compares it head-to-head with this random forest and a hard-coded basic strategy chart. See `rl/RESULTS.md` for the comparison table and analysis.

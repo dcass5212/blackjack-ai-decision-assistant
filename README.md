@@ -202,6 +202,40 @@ py ml/predict_policy.py --sample stand20
 - The supervised ML model learns to imitate Monte Carlo labels; it is not trained against perfect Blackjack strategy or casino-grade basic strategy tables.
 - Splitting, surrender, insurance, side bets, and multi-deck shoe behavior are intentionally out of scope.
 
+## Reinforcement Learning Extension
+
+The project now includes a reinforcement learning agent trained from scratch using PPO, compared head-to-head against the Monte Carlo simulator labels and the supervised random forest. The three-stage narrative is:
+
+1. **Monte Carlo** (oracle) — simulates thousands of futures per decision
+2. **Supervised ML** (imitation) — random forest trained on Monte Carlo labels
+3. **RL agent** (experience) — learns from game outcomes alone, no labels
+
+See [`rl/RESULTS.md`](rl/RESULTS.md) for the full comparison table, learning curve, and analysis.
+
+Quick summary (100,000 hands, same seeded sequence):
+
+| Agent | Win% | Push% | Loss% | EV/hand |
+|---|---:|---:|---:|---:|
+| Basic strategy | 43.09% | 9.05% | 47.86% | −0.0306 |
+| Random forest | 42.50% | 8.61% | 48.89% | −0.0543 |
+| RL (MaskablePPO) | 45.16% | 9.02% | 45.82% | −0.0065 |
+
+*(Run `python rl/evaluate.py` to reproduce these numbers from the saved policy.)*
+
+Train the RL agent from scratch:
+
+```powershell
+py -m pip install -r rl/requirements.txt
+py rl/train.py                   # ~15 min on CPU, saves rl/models/policy.zip
+py rl/evaluate.py                # compare all three agents, saves rl/logs/evaluation_results.csv
+```
+
+## Limitations
+- The live Monte Carlo assistant estimates outcomes from the visible dealer upcard, so recommendations vary slightly between runs because the hidden card is sampled during simulation.
+- After simulating an initial `hit`, the simulated player follows a simple policy of drawing until 17 or higher.
+- The supervised ML model learns to imitate Monte Carlo labels; it is not trained against perfect Blackjack strategy or casino-grade basic strategy tables.
+- Splitting, surrender, insurance, side bets, and multi-deck shoe behavior are intentionally out of scope.
+
 ## Technologies
 - HTML
 - CSS
@@ -211,3 +245,6 @@ py ml/predict_policy.py --sample stand20
 - Python
 - scikit-learn
 - Supervised learning
+- PyTorch
+- Stable-Baselines3 (MaskablePPO)
+- Gymnasium

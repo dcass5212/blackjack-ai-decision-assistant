@@ -119,3 +119,25 @@ Deliverables:
 - Saved model artifact
 - Evaluation summary with accuracy and confusion matrix
 - README section explaining that the model approximates Monte Carlo labels
+
+## Phase 8: Reinforcement Learning Agent
+
+Goal: Train a policy from scratch using RL, then compare it head-to-head against the Monte Carlo simulator and the supervised ML model. The narrative arc is: Monte Carlo (oracle) → supervised imitation (learns from the oracle) → RL (learns from experience alone).
+
+Design decisions (confirmed before implementation):
+
+- **State vector:** 16 features, identical to the supervised model — player_total, is_soft_hand, player_card_count, dealer_upcard_value, can_double_down, remaining_cards, count_ace through count_10. Full feature parity eliminates feature differences as a confound in the comparison.
+- **Action space:** 3 discrete actions (hit=0, stand=1, doubleDown=2). Illegal actions handled by masking (not penalty) — doubleDown is masked out on 3-card hands.
+- **Reward:** +1 win, 0 push, −1 loss, ±2 on doubles. No intermediate rewards or shaping.
+- **Algorithm:** MaskablePPO (stable-baselines3 + sb3-contrib). PPO chosen over DQN for stability under high per-hand variance and clean action-mask integration. Convergence expected in 500k–2M timesteps on CPU.
+- **Environment:** Python port of the game (reusing logic from generate_dataset.py), wrapped in a Gymnasium interface. No JS bridge.
+- **Evaluation:** 100,000 hands, same seeded sequence for all three agents. SE on EV ≈ ±0.31%, enough to distinguish correct convergence from a poor policy.
+
+Deliverables:
+- `rl/env.py` — Gymnasium-compatible BlackjackEnv
+- `rl/train.py` — MaskablePPO training script, logs episode return and win/push/loss rates to CSV
+- `rl/basic_strategy.py` — hard-coded single-deck basic strategy chart
+- `rl/evaluate.py` — evaluation harness comparing RL, random forest, and basic strategy
+- `rl/requirements.txt` — pinned RL dependencies (separate from ml/requirements.txt)
+- `rl/RESULTS.md` — comparison table, learning curve, and honest analysis
+- Updated top-level README section pointing to the RL work
